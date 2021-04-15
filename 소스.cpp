@@ -37,7 +37,6 @@ ObjectID clear = createObject("image//clear.png");
 
 TimerID gameTimer = createTimer(0);
 TimerID tempTimer = createTimer(1.0f);  
-TimerID clearTimer = createTimer(2.0f);
 
 typedef struct {
 	int x;
@@ -209,11 +208,8 @@ void gameEnding() {
 	selectHanger = -1;
 	top0 = top1 = top2 = 0;
 
-	hideTimer();
 	stopTimer(gameTimer);
 	stopTimer(tempTimer);
-	startTimer(clearTimer);
-	setTimer(gameTimer, 0);
 	setTimer(tempTimer, 1.0f);
 }
 
@@ -298,6 +294,11 @@ void mousecallback(ObjectID object, int x, int y, MouseAction action) {
 	if (object == homeEnd) endGame();
 	else if (object == howToPlayButton) showObject(howToPlay);
 	else if (object == howToPlay) hideObject(howToPlay);
+	else if (object == clear) {
+		hideTimer();
+		hideObject(clear);
+		setTimer(gameTimer, 0);
+	}
 	else if (object == ringCount3) { stageNumber = 3; hanoiStart(); }
 	else if (object == ringCount4) { stageNumber = 4; hanoiStart(); }
 	else if (object == ringCount5) { stageNumber = 5; hanoiStart(); }
@@ -338,11 +339,6 @@ void timercallback(TimerID timer) {
 		setTimer(tempTimer, 1.0f);
 		startTimer(tempTimer);
 		setTimer(gameTimer, ++gameSecond);
-	}
-	else if (timer == clearTimer) {
-		hideObject(clear);
-		stopTimer(clearTimer);
-		setTimer(clearTimer, 2.0f);
 	}
 }
 
