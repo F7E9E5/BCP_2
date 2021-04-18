@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <bangtal.h>
 
+//홈 화면, 게임 화면
 SceneID home = createScene("home", "image//home.png");
 SceneID game = createScene("game", "image//game.png");
 
+//홈 화면의 종료 버튼, 도움말 버튼
 ObjectID homeEnd = createObject("image//homeEnd.png"); 
-ObjectID gameEnd = createObject("image//gameEnd.png");  
 ObjectID howToPlay = createObject("image//howToPlay.png"); 
 ObjectID howToPlayButton = createObject("image//howToPlayButton.png"); 
 
+//홈 화면 고리 개수 선택 버튼
 ObjectID ringCount3 = createObject("image//3.png");
 ObjectID ringCount4 = createObject("image//4.png");
 ObjectID ringCount5 = createObject("image//5.png");
@@ -16,6 +18,7 @@ ObjectID ringCount6 = createObject("image//6.png");
 ObjectID ringCount7 = createObject("image//7.png");
 ObjectID ringCount8 = createObject("image//8.png");
 
+//고리 
 ObjectID ring0 = createObject("image//ring0.png");
 ObjectID ring1 = createObject("image//ring1.png");
 ObjectID ring2 = createObject("image//ring2.png");
@@ -25,19 +28,26 @@ ObjectID ring5 = createObject("image//ring5.png");
 ObjectID ring6 = createObject("image//ring6.png");
 ObjectID ring7 = createObject("image//ring7.png");
 
+//회색 박스
 ObjectID hanger0 = createObject("image//hanger.png");
 ObjectID hanger1 = createObject("image//hanger.png");
 ObjectID hanger2 = createObject("image//hanger.png");
 
+//걸이 아래 공간 (투명)
 ObjectID box0 = createObject("image//box.png");
 ObjectID box1 = createObject("image//box.png");
 ObjectID box2 = createObject("image//box.png");
 
+//성공 시 화면
 ObjectID clear = createObject("image//clear.png");
 
+//게임 시간 측정 타이머
 TimerID gameTimer = createTimer(0);
 TimerID tempTimer = createTimer(1.0f);  
 
+//고리의 위치 
+//x -> 몇 번째 걸이인지 (0~2)
+//y -> 몇 번째 고리인지 (0~7)
 typedef struct {
 	int x;
 	int y;
@@ -48,6 +58,7 @@ location ringLocation[8];
 int ringx[8];
 int ringy[8];
 
+//스택을 통해 어떤 고리가 걸려있는지 저장
 int stack0[8];
 int stack1[8];
 int stack2[8];
@@ -56,12 +67,14 @@ int top0 = 0;
 int top1 = 0;
 int top2 = 0;
 
+//게임 구동 시 사용될 변수들
 int gameflag = 0;
 int selectFlag = 0;
 int gameSecond = 0; 
 int stageNumber = -1;
 int selectHanger = -1;
 
+//답안 출력
 int count; 
 int arr[500][2];
 
@@ -76,12 +89,15 @@ void hanoi(int a, int b, int c, int N) {
 	hanoi(b, a, c, N - 1);
 }
 
+//스택 푸쉬
 void push(int hangerNumber, int ringNumber) {
 	if (hangerNumber == 0) stack0[top0++] = ringNumber;
 	else if (hangerNumber == 1) stack1[top1++] = ringNumber;
 	else if (hangerNumber == 2) stack2[top2++] = ringNumber;
 }
 
+//게임 시작 시 처음 고리 위치 정해주는 함수
+//선택한 고리 개수에 따라 사용될 고리의 위치를 정해준다
 void locateRingInitial() {
 	for (int i = 0; i < stageNumber; i++) {
 		push(0, stageNumber - i - 1);
@@ -136,6 +152,9 @@ void locateRingInitial() {
 	}	
 }
 
+//고리의 좌표를 정해주는 함수
+//고리의 정해진 위치에 따라 실제 좌표를 정하고
+//게임 화면 내에 위치시킨다
 void locateRing() {
 	for (int i = 0; i < stageNumber; i++) {
 		ringx[i] = 66 + ringLocation[i].x * (66 + 340);
@@ -188,7 +207,8 @@ void locateRing() {
 		locateObject(ring7, game, ringx[7], ringy[7]);
 	}
 }
-		
+
+//회색 박스를 표시하는 함수
 void displayHanger(int selectHanger) {
 	hideObject(hanger0);
 	hideObject(hanger1);
@@ -198,6 +218,9 @@ void displayHanger(int selectHanger) {
 	else if (selectHanger == 2) showObject(hanger2);
 }
 
+//게임 성공 시 실행되는 함수
+//홈 화면 이동, 성공 이미지 출력
+//게임 처음으로 초기화
 void gameEnding() {
 	enterScene(home);
 	showObject(clear);
@@ -211,8 +234,18 @@ void gameEnding() {
 	stopTimer(gameTimer);
 	stopTimer(tempTimer);
 	setTimer(tempTimer, 1.0f);
+
+	hideObject(ring0);
+	hideObject(ring1);
+	hideObject(ring2);
+	hideObject(ring3);
+	hideObject(ring4);
+	hideObject(ring5);
+	hideObject(ring6);
+	hideObject(ring7);
 }
 
+//게임이 성공했는지 확인하는 함수
 void ringCheck() {
 	int checkFlag = 1;
 	if (top2 != stageNumber) checkFlag = 0;
@@ -222,6 +255,7 @@ void ringCheck() {
 	if (checkFlag == 1) gameEnding();
 }
 
+//게임 시작
 void hanoiStart() {
 	enterScene(game);
 	locateRingInitial();
@@ -232,6 +266,7 @@ void hanoiStart() {
 	startTimer(tempTimer);
 }
 
+//고리의 위치를 바꾸어주는 함수
 void moveRing(int a, int b) {
 	selectFlag = 0;
 	selectHanger = -1;
@@ -375,7 +410,6 @@ int main() {
 	showObject(box1);
 	showObject(box2);
 	showObject(homeEnd);
-	showObject(gameEnd);
 	showObject(howToPlayButton);
 
 	showObject(ringCount3);
@@ -385,6 +419,7 @@ int main() {
 	showObject(ringCount7);
 	showObject(ringCount8);
 
+	//답안 출력
 	for (int i = 2; i < 8; i++) {
 		count = 0;
 		hanoi(1, 2, 3, i + 1);
